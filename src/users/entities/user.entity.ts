@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { ValidRoles } from '../../auth/interfaces/valid-roles';
 
 @Entity('users')
 export class User {
@@ -20,11 +21,18 @@ export class User {
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, select: false })
   password: string;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone?: string;
+
+  @Column({
+    type: 'enum',
+    enum: ValidRoles,
+    default: ValidRoles.user
+  })
+  role: ValidRoles;
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
