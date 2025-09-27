@@ -73,8 +73,6 @@ El sistema crea automáticamente estos usuarios:
 
 | Rol | Email | Contraseña |
 |-----|-------|------------|
-| Admin | admin@biblioteca.com | Admin123! |
-| Bibliotecario | bibliotecario@biblioteca.com | Librarian123! |
 | Usuario | usuario@biblioteca.com | User123! |
 
 ## 📖 Desarrollo
