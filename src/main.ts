@@ -1,6 +1,7 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     })
   );
+
+  // Autenticación global
+  app.useGlobalGuards(new JwtAuthGuard(app.get(Reflector)));
 
   await app.listen(process.env.PORT ?? 3000);
   logger.log(`App running on port ${process.env.PORT ?? 3000}`);

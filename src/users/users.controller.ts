@@ -3,7 +3,9 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ValidRoles } from '../auth/interfaces/valid-roles';
+import { Auth } from '../auth/decorators';
 
+@Auth(ValidRoles.admin) // Todo el controlador requiere rol admin
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
