@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Servicio de PostgreSQL
   postgres:
@@ -14,7 +12,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db:/docker-entrypoint-initdb.d
     networks:
       - gestlib-network
 
@@ -39,9 +36,6 @@ services:
       - "3000:3000"
     depends_on:
       - postgres
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
     networks:
       - gestlib-network
 

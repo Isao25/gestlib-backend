@@ -21,78 +21,135 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# 📚 Sistema de Gestión de Biblioteca - Backend
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+API REST desarrollada con NestJS para gestión completa de biblioteca con autenticación JWT y sistema de préstamos.
 
-## Project setup
+## 🚀 Características
 
+- ✅ **Autenticación JWT** con roles (admin, bibliotecario, usuario)
+- 📖 **Gestión de libros** con inventario automático
+- 👥 **Gestión de usuarios** con diferentes roles
+- 📋 **Sistema de préstamos** con control automático de inventario
+- 🐘 **PostgreSQL 17** con TypeORM
+- 🐳 **Dockerizado** con docker-compose
+- 🌱 **Seeder automático** para usuarios iniciales
+- 🔒 **Seguridad** con variables de entorno
+
+## 🛠️ Inicio Rápido
+
+### Prerrequisitos
+- Docker y Docker Compose
+- Git
+
+### Instalación
+
+1. **Clonar el repositorio**
 ```bash
-$ npm install
+git clone <repo-url>
+cd gestlib-backend
 ```
 
-## Compile and run the project
-
+2. **Iniciar el sistema**
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+./start.sh
 ```
 
-## Run tests
+El sistema creará automáticamente:
+- Base de datos PostgreSQL
+- Backend NestJS
+- Usuarios iniciales
+- Interfaz PgAdmin
+
+## 🌐 Acceso al Sistema
+
+- **Backend API**: http://localhost:3000
+- **PgAdmin**: http://localhost:5050
+- **Base de datos**: localhost:5432
+
+## 👤 Usuarios Iniciales
+
+El sistema crea automáticamente estos usuarios:
+
+| Rol | Email | Contraseña |
+|-----|-------|------------|
+| Admin | admin@biblioteca.com | Admin123! |
+| Bibliotecario | bibliotecario@biblioteca.com | Librarian123! |
+| Usuario | usuario@biblioteca.com | User123! |
+
+## 📖 Desarrollo
 
 ```bash
-# unit tests
-$ npm run test
+# Modo desarrollo (con hot reload)
+./dev.sh
 
-# e2e tests
-$ npm run test:e2e
+# Ver logs en tiempo real
+docker compose logs -f backend
 
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 🔧 Comandos Útiles
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Parar servicios (conservando datos)
+docker compose down
+
+# Reinicio completo (elimina todos los datos)
+docker compose down -v && ./start.sh
+
+# Ver estado de contenedores
+docker compose ps
+
+# Conectar a PostgreSQL directamente
+docker compose exec postgres psql -U biblioteca_admin -d biblioteca_sistema_db
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 📋 API Endpoints
 
-## Resources
+### Autenticación
+- `POST /api/auth/login` - Iniciar sesión
+- `POST /api/auth/register` - Registrar usuario
 
-Check out a few resources that may come in handy when working with NestJS:
+### Usuarios
+- `GET /api/users` - Listar usuarios
+- `POST /api/users` - Crear usuario
+- `GET /api/users/:id` - Obtener usuario
+- `PATCH /api/users/:id` - Actualizar usuario
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Libros
+- `GET /api/books` - Listar libros
+- `POST /api/books` - Crear libro
+- `GET /api/books/:id` - Obtener libro
+- `PATCH /api/books/:id` - Actualizar libro
 
-## Support
+### Préstamos
+- `GET /api/loans` - Listar préstamos
+- `POST /api/loans/create` - Crear préstamo
+- `PATCH /api/loans/:id/return` - Devolver libro
+- `GET /api/loans/overdue` - Préstamos vencidos
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 🏗️ Arquitectura
 
-## Stay in touch
+```
+src/
+├── auth/           # Autenticación JWT
+├── users/          # Gestión de usuarios
+├── books/          # Gestión de libros
+├── loans/          # Sistema de préstamos
+└── database/       # Seeder automático
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 🔒 Variables de Entorno
 
-## License
+El archivo `.env` contiene todas las configuraciones necesarias:
+- Credenciales de base de datos
+- Configuración JWT
+- Usuarios iniciales
+- PgAdmin credentials
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 📚 Tecnologías
+
+- **NestJS 11** - Framework backend
+- **TypeORM** - ORM para PostgreSQL
+- **PostgreSQL 17** - Base de datos
+- **JWT** - Autenticación
+- **bcrypt** - Encriptación de contraseñas
+- **Docker** - Containerización

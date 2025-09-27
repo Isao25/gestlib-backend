@@ -78,6 +78,13 @@ export class UsersService {
     return user;
   }
 
+  async findByEmailSafe(email: string): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: { email },
+      select: { id: true, email: true, password: true, name: true, surname: true, role: true, isActive: true }
+    });
+  }
+
   async findByRole(role: ValidRoles): Promise<User[]> {
     return await this.userRepository.find({
       where: { role, isActive: true },

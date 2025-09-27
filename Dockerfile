@@ -7,14 +7,17 @@ WORKDIR /usr/src/app
 # Copia los archivos package.json y package-lock.json (si existe)
 COPY package*.json ./
 
-# Instala las dependencias
-RUN npm ci --only=production && npm cache clean --force
+# Instala TODAS las dependencias (incluyendo devDependencies para el build)
+RUN npm ci && npm cache clean --force
 
 # Copia el resto del código fuente
 COPY . .
 
 # Construye la aplicación
 RUN npm run build
+
+# Elimina devDependencies después del build para reducir tamaño
+RUN npm prune --production
 
 # Expone el puerto en el que la aplicación se ejecutará
 EXPOSE 3000
