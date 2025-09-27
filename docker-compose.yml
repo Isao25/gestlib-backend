@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Servicio de PostgreSQL
+  postgres:
+    image: postgres:17-alpine
+    container_name: gestlib-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gestlib_user
+      POSTGRES_PASSWORD: gestlib_password
+      POSTGRES_DB: gestlib_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    networks:
+      - gestlib-network
+
+  # Servicio del backend NestJS
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gestlib-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=gestlib_user
+      - DATABASE_PASSWORD=gestlib_password
+      - DATABASE_NAME=gestlib_db
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - gestlib-network
+
+  # Servicio opcional de pgAdmin para administrar la base de datos
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: gestlib-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gestlib.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - gestlib-network
+
+volumes:
+  postgres_data:
+
+networks:
+  gestlib-network:
+    driver: bridge
