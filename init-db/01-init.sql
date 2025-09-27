@@ -7,6 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Crear enum types
 CREATE TYPE valid_roles AS ENUM ('admin', 'librarian', 'user');
 CREATE TYPE book_status AS ENUM ('available', 'borrowed');
+CREATE TYPE loan_status AS ENUM ('active', 'returned', 'overdue');
 
 -- Crear tablas básicas según las entidades TypeORM
 CREATE TABLE IF NOT EXISTS users (
@@ -34,6 +35,21 @@ CREATE TABLE IF NOT EXISTS books (
     "totalCopies" INTEGER DEFAULT 1,
     "availableCopies" INTEGER DEFAULT 1,
     status book_status DEFAULT 'available'
+);
+
+CREATE TABLE IF NOT EXISTS loans (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "loanDate" DATE NOT NULL,
+    "dueDate" DATE NOT NULL,
+    "returnDate" DATE,
+    status loan_status DEFAULT 'active',
+    notes TEXT,
+    "userId" UUID NOT NULL,
+    "bookId" UUID NOT NULL,
+    FOREIGN KEY ("userId") REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY ("bookId") REFERENCES books(id) ON DELETE CASCADE
 );
 
 -- Insertar usuarios de ejemplo

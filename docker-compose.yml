@@ -7,9 +7,9 @@ services:
     container_name: gestlib-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: gestlib_user
-      POSTGRES_PASSWORD: gestlib_password
-      POSTGRES_DB: gestlib_db
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
     ports:
       - "5432:5432"
     volumes:
@@ -27,12 +27,14 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=${PORT}
       - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_USER=gestlib_user
-      - DATABASE_PASSWORD=gestlib_password
-      - DATABASE_NAME=gestlib_db
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
     ports:
       - "3000:3000"
     depends_on:
@@ -49,8 +51,8 @@ services:
     container_name: gestlib-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@gestlib.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - "5050:80"
     depends_on:
