@@ -2,6 +2,7 @@ import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { ConfigService } from '@nestjs/config';
 import { ValidRoles } from '../auth/interfaces/valid-roles';
+import { BooksSeederService } from './books-seeder.service';
 
 @Injectable()
 export class DatabaseSeederService implements OnApplicationBootstrap {
@@ -10,63 +11,73 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
   constructor(
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
+    private readonly booksSeederService: BooksSeederService,
   ) {}
 
   async onApplicationBootstrap() {
-    this.logger.log('🌱 Iniciando seeder de base de datos...');
-    await this.seedUsers();
+    if (this.configService.get('NODE_ENV') === 'development') {
+      this.logger.log('🌱 Starting database seeding...');
+      
+      try {
+        await this.seedUsers();
+        await this.seedBooks();
+        this.logger.log('✅ Database seeding completed successfully');
+      } catch (error) {
+        this.logger.error('❌ Database seeding failed:', error);
+      }
+    }
   }
 
   private async seedUsers() {
     try {
-      // Verificar si ya existe el usuario admin
-      const adminEmail = this.configService.get('ADMIN_EMAIL') || 'admin@biblioteca.com';
-      const existingAdmin = await this.usersService.findByEmailSafe(adminEmail);
-
+      // Check if admin user already exists
+      const existingAdmin = await this.usersService.findByEmailSafe('admin@gestlib.com');
       if (existingAdmin) {
-        this.logger.log('✅ Los usuarios ya existen en la base de datos');
+        this.logger.log('👤 Admin user already exists, skipping user seeding');
         return;
       }
 
-      this.logger.log('👥 Creando usuarios iniciales...');
-
-      // Crear usuario admin
+      // Create admin user
       await this.usersService.create({
-        name: this.configService.get('ADMIN_NAME') || 'Admin',
-        surname: this.configService.get('ADMIN_SURNAME') || 'Sistema',
-        email: this.configService.get('ADMIN_EMAIL') || 'admin@biblioteca.com',
-        password: this.configService.get('ADMIN_PASSWORD') || 'Admin123!',
+        name: 'Administrator',
+        surname: 'System',
+        email: 'admin@gestlib.com',
+        password: 'Admin123!',
         role: ValidRoles.admin,
-        phone: '555-1001',
       });
 
-      // Crear bibliotecario
+      // Create regular user
       await this.usersService.create({
-        name: this.configService.get('LIBRARIAN_NAME') || 'Bibliotecario',
-        surname: this.configService.get('LIBRARIAN_SURNAME') || 'Principal',
-        email: this.configService.get('LIBRARIAN_EMAIL') || 'bibliotecario@biblioteca.com',
-        password: this.configService.get('LIBRARIAN_PASSWORD') || 'Librarian123!',
-        role: ValidRoles.librarian,
-        phone: '555-2001',
-      });
-
-      // Crear usuario normal
-      await this.usersService.create({
-        name: this.configService.get('USER_NAME') || 'Usuario',
-        surname: this.configService.get('USER_SURNAME') || 'Prueba',
-        email: this.configService.get('USER_EMAIL') || 'usuario@biblioteca.com',
-        password: this.configService.get('USER_PASSWORD') || 'User123!',
+        name: 'Juan',
+        surname: 'Pérez',
+        email: 'juan.perez@student.unmsm.edu.pe',
+        password: 'Student123!',
         role: ValidRoles.user,
-        phone: '555-3001',
       });
 
-      this.logger.log('✅ Usuarios creados exitosamente:');
-      this.logger.log(`👑 Admin: ${this.configService.get('ADMIN_EMAIL')}`);
-      this.logger.log(`📚 Bibliotecario: ${this.configService.get('LIBRARIAN_EMAIL')}`);
-      this.logger.log(`👤 Usuario: ${this.configService.get('USER_EMAIL')}`);
+      // Create librarian user
+      await this.usersService.create({
+        name: 'María',
+        surname: 'García',
+        email: 'maria.garcia@unmsm.edu.pe',
+        password: 'Librarian123!',
+        role: ValidRoles.admin,
+      });
 
+      this.logger.log('👥 Users seeded successfully');
     } catch (error) {
-      this.logger.error('❌ Error creando usuarios iniciales:', error.message);
+      this.logger.error('Failed to seed users:', error);
+      throw error;
+    }
+  }
+
+  private async seedBooks() {
+    try {
+      await this.booksSeederService.seedFromCSV();
+      this.logger.log('� Books seeded successfully');
+    } catch (error) {
+      this.logger.error('Failed to seed books:', error);
+      throw error;
     }
   }
 }

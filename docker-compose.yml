@@ -23,7 +23,7 @@ services:
     container_name: gestlib-backend
     restart: unless-stopped
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=${PORT}
       - DATABASE_HOST=postgres
       - DATABASE_PORT=${DATABASE_PORT}

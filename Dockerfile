@@ -16,11 +16,8 @@ COPY . .
 # Construye la aplicación
 RUN npm run build
 
-# Elimina devDependencies después del build para reducir tamaño
-RUN npm prune --production
-
 # Expone el puerto en el que la aplicación se ejecutará
 EXPOSE 3000
 
-# Define el comando para ejecutar la aplicación
-CMD ["npm", "run", "start:prod"]
+# Define el comando para ejecutar la aplicación basado en NODE_ENV
+CMD ["sh", "-c", "if [ \"$NODE_ENV\" = \"development\" ]; then npm run start:dev; else npm prune --production && npm run start:prod; fi"]
