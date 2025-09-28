@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { ValidRoles } from '../auth/interfaces/valid-roles';
+import { PaginationDto, PaginatedResponse } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class UsersService {
@@ -43,11 +44,44 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(
+    paginationDto: PaginationDto, 
+    filters: { role?: ValidRoles; active?: string; search?: string } = {}
+  ): Promise<PaginatedResponse<User>> {
     try {
-      return await this.userRepository.find({
-        order: { createdAt: 'DESC' }
-      });
+      const { page = 1, limit = 10 } = paginationDto;
+      const { role, active, search } = filters;
+
+      const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+      // Aplicar filtros
+      if (role) {
+        queryBuilder.andWhere('user.role = :role', { role });
+      }
+
+      if (active === 'true') {
+        queryBuilder.andWhere('user.isActive = :isActive', { isActive: true });
+      } else if (active === 'false') {
+        queryBuilder.andWhere('user.isActive = :isActive', { isActive: false });
+      }
+
+      if (search) {
+        queryBuilder.andWhere(
+          '(user.name ILIKE :search OR user.surname ILIKE :search OR user.email ILIKE :search)',
+          { search: `%${search}%` }
+        );
+      }
+
+      // Paginación
+      const skip = (page - 1) * limit;
+      queryBuilder
+        .orderBy('user.createdAt', 'DESC')
+        .skip(skip)
+        .take(limit);
+
+      const [users, total] = await queryBuilder.getManyAndCount();
+
+      return new PaginatedResponse(users, total, page, limit);
     } catch (error) {
       this.handleDBErrors(error);
     }

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { FindBooksDto } from './dto/find-books.dto';
 import { Public, Auth } from '../auth/decorators';
 import { ValidRoles } from '../auth/interfaces/valid-roles';
 
@@ -17,14 +18,24 @@ export class BooksController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.booksService.findAll();
+  findAll(@Query() findBooksDto: FindBooksDto) {
+    const { page, limit, search, available, author, category } = findBooksDto;
+    return this.booksService.findAll(
+      { page, limit }, 
+      { 
+        search, 
+        available: available ? 'true' : undefined, 
+        genre: category, 
+        author 
+      }
+    );
   }
 
   @Public()
   @Get('available')
-  findAvailable() {
-    return this.booksService.findAvailable();
+  findAvailable(@Query() findBooksDto: FindBooksDto) {
+    const { page, limit } = findBooksDto;
+    return this.booksService.findAvailable({ page, limit });
   }
 
   @Public()

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FindUsersDto } from './dto/find-users.dto';
 import { ValidRoles } from '../auth/interfaces/valid-roles';
 import { Auth } from '../auth/decorators';
 
@@ -16,14 +17,12 @@ export class UsersController {
   }
 
   @Get()
-  findAll(@Query('role') role?: ValidRoles, @Query('active') active?: string) {
-    if (role) {
-      return this.usersService.findByRole(role);
-    }
-    if (active === 'true') {
-      return this.usersService.findActiveUsers();
-    }
-    return this.usersService.findAll();
+  findAll(@Query() findUsersDto: FindUsersDto) {
+    const { page, limit, role, active, search } = findUsersDto;
+    return this.usersService.findAll(
+      { page, limit }, 
+      { role, active, search }
+    );
   }
 
   @Get('email/:email')

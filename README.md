@@ -81,8 +81,33 @@ El sistema crea automáticamente estos usuarios:
 # Modo desarrollo (con hot reload)
 ./dev.sh
 
-# Ver logs en tiempo real
+# Ver logs interactivamente
+./logs.sh
+```
+
+## 📝 Visualización de Logs
+
+### Opciones rápidas de logs:
+```bash
+# Ver logs de todos los servicios en tiempo real
+docker compose logs -f
+
+# Ver logs solo del backend
 docker compose logs -f backend
+
+# Ver logs con timestamps
+docker compose logs -f --timestamps backend
+
+# Ver últimas 50 líneas
+docker compose logs --tail=50 backend
+```
+
+### Script interactivo:
+```bash
+./logs.sh
+```
+
+El script `logs.sh` te permite elegir entre diferentes opciones de visualización de logs de forma interactiva.
 
 ## 🔧 Comandos Útiles
 

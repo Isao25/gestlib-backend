@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Patch, Param, ParseUUIDPipe, Body, Query } from '@nestjs/common';
 import { LoansService } from './loans.service';
+import { FindLoansDto } from './dto/find-loans.dto';
 import { Auth } from '../auth/decorators';
 import { ValidRoles } from '../auth/interfaces/valid-roles';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Controller('loans')
 export class LoansController {
@@ -19,20 +21,26 @@ export class LoansController {
 
   @Auth(ValidRoles.admin, ValidRoles.librarian)
   @Get()
-  findAll() {
-    return this.loansService.findAll();
+  findAll(@Query() findLoansDto: FindLoansDto) {
+    const { page, limit, status, userId, search } = findLoansDto;
+    return this.loansService.findAll(
+      { page, limit }, 
+      { status, userId, search }
+    );
   }
 
   @Auth(ValidRoles.admin, ValidRoles.librarian)
   @Get('active')
-  findActiveLoans() {
-    return this.loansService.findActiveLoans();
+  findActiveLoans(@Query() findLoansDto: FindLoansDto) {
+    const { page, limit } = findLoansDto;
+    return this.loansService.findActiveLoans({ page, limit });
   }
 
   @Auth(ValidRoles.admin, ValidRoles.librarian)
   @Get('overdue')
-  findOverdueLoans() {
-    return this.loansService.findOverdueLoans();
+  findOverdueLoans(@Query() findLoansDto: FindLoansDto) {
+    const { page, limit } = findLoansDto;
+    return this.loansService.findOverdueLoans({ page, limit });
   }
 
   @Auth(ValidRoles.admin, ValidRoles.librarian)
@@ -42,8 +50,11 @@ export class LoansController {
   }
 
   @Get('user/:userId')
-  findByUserId(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.loansService.findByUserId(userId);
+  findByUserId(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Query() paginationDto: PaginationDto
+  ) {
+    return this.loansService.findByUserId(userId, paginationDto);
   }
 
   @Auth(ValidRoles.admin, ValidRoles.librarian)

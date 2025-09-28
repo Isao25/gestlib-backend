@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -8,6 +8,7 @@ import { BooksModule } from './books/books.module';
 import { AuthModule } from './auth/auth.module';
 import { LoansModule } from './loans/loans.module';
 import { DatabaseModule } from './database/database.module';
+import { HttpLoggingMiddleware } from './common/middleware/http-logging.middleware';
 
 @Module({
   imports: [
@@ -34,4 +35,9 @@ import { DatabaseModule } from './database/database.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Aplicar logging middleware a todas las rutas
+    consumer.apply(HttpLoggingMiddleware).forRoutes('*');
+  }
+}

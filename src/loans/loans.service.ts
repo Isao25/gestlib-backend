@@ -4,6 +4,7 @@ import { Repository, LessThan } from 'typeorm';
 import { Loan, LoanStatus } from './entities/loan.entity';
 import { User } from '../users/entities/user.entity';
 import { Book } from '../books/entities/book.entity';
+import { PaginationDto, PaginatedResponse } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class LoansService {
@@ -75,18 +76,50 @@ export class LoansService {
     }
   }
 
-  async findAll(): Promise<Loan[]> {
+  async findAll(
+    paginationDto: PaginationDto,
+    filters: { status?: string; userId?: string; search?: string } = {}
+  ): Promise<PaginatedResponse<Loan>> {
     try {
-      return await this.loanRepository.find({
-        order: { createdAt: 'DESC' },
-        relations: ['user', 'book']
-      });
+      const { page = 1, limit = 10 } = paginationDto;
+      const { status, userId, search } = filters;
+
+      const queryBuilder = this.loanRepository.createQueryBuilder('loan')
+        .leftJoinAndSelect('loan.user', 'user')
+        .leftJoinAndSelect('loan.book', 'book');
+
+      // Aplicar filtros
+      if (status) {
+        queryBuilder.andWhere('loan.status = :status', { status });
+      }
+
+      if (userId) {
+        queryBuilder.andWhere('loan.userId = :userId', { userId });
+      }
+
+      if (search) {
+        queryBuilder.andWhere(
+          '(user.name ILIKE :search OR user.surname ILIKE :search OR book.title ILIKE :search OR book.author ILIKE :search)',
+          { search: `%${search}%` }
+        );
+      }
+
+      // Paginación
+      const skip = (page - 1) * limit;
+      queryBuilder
+        .orderBy('loan.createdAt', 'DESC')
+        .skip(skip)
+        .take(limit);
+
+      const [loans, total] = await queryBuilder.getManyAndCount();
+
+      return new PaginatedResponse(loans, total, page, limit);
     } catch (error) {
       this.handleDBErrors(error);
     }
   }
 
-  async findByUserId(userId: string): Promise<Loan[]> {
+  async findByUserId(userId: string, paginationDto: PaginationDto): Promise<PaginatedResponse<Loan>> {
     // Verificar que el usuario existe
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
@@ -94,38 +127,65 @@ export class LoansService {
     }
 
     try {
-      return await this.loanRepository.find({
-        where: { userId },
-        order: { createdAt: 'DESC' },
-        relations: ['user', 'book']
-      });
+      const { page = 1, limit = 10 } = paginationDto;
+
+      const queryBuilder = this.loanRepository.createQueryBuilder('loan')
+        .leftJoinAndSelect('loan.user', 'user')
+        .leftJoinAndSelect('loan.book', 'book')
+        .where('loan.userId = :userId', { userId })
+        .orderBy('loan.createdAt', 'DESC');
+
+      const skip = (page - 1) * limit;
+      queryBuilder.skip(skip).take(limit);
+
+      const [loans, total] = await queryBuilder.getManyAndCount();
+
+      return new PaginatedResponse(loans, total, page, limit);
     } catch (error) {
       this.handleDBErrors(error);
     }
   }
 
-  async findActiveLoans(): Promise<Loan[]> {
+  async findActiveLoans(paginationDto: PaginationDto): Promise<PaginatedResponse<Loan>> {
     try {
-      return await this.loanRepository.find({
-        where: { status: LoanStatus.ACTIVE },
-        order: { dueDate: 'ASC' },
-        relations: ['user', 'book']
-      });
+      const { page = 1, limit = 10 } = paginationDto;
+
+      const queryBuilder = this.loanRepository.createQueryBuilder('loan')
+        .leftJoinAndSelect('loan.user', 'user')
+        .leftJoinAndSelect('loan.book', 'book')
+        .where('loan.status = :status', { status: LoanStatus.ACTIVE })
+        .orderBy('loan.dueDate', 'ASC');
+
+      const skip = (page - 1) * limit;
+      queryBuilder.skip(skip).take(limit);
+
+      const [loans, total] = await queryBuilder.getManyAndCount();
+
+      return new PaginatedResponse(loans, total, page, limit);
     } catch (error) {
       this.handleDBErrors(error);
     }
   }
 
-  async findOverdueLoans(): Promise<Loan[]> {
+  async findOverdueLoans(paginationDto: PaginationDto): Promise<PaginatedResponse<Loan>> {
     try {
       // Actualizar préstamos vencidos primero
       await this.updateOverdueLoans();
 
-      return await this.loanRepository.find({
-        where: { status: LoanStatus.OVERDUE },
-        order: { dueDate: 'ASC' },
-        relations: ['user', 'book']
-      });
+      const { page = 1, limit = 10 } = paginationDto;
+
+      const queryBuilder = this.loanRepository.createQueryBuilder('loan')
+        .leftJoinAndSelect('loan.user', 'user')
+        .leftJoinAndSelect('loan.book', 'book')
+        .where('loan.status = :status', { status: LoanStatus.OVERDUE })
+        .orderBy('loan.dueDate', 'ASC');
+
+      const skip = (page - 1) * limit;
+      queryBuilder.skip(skip).take(limit);
+
+      const [loans, total] = await queryBuilder.getManyAndCount();
+
+      return new PaginatedResponse(loans, total, page, limit);
     } catch (error) {
       this.handleDBErrors(error);
     }
