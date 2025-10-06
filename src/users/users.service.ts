@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike } from 'typeorm';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,7 +24,7 @@ export class UsersService {
     try {
       // Verificar si el usuario ya existe
       const existingUser = await this.userRepository.findOne({
-        where: { email: createUserDto.email }
+        where: { email: createUserDto.email },
       });
 
       if (existingUser) {
@@ -31,12 +36,13 @@ export class UsersService {
       const user = this.userRepository.create({
         ...userData,
         password: bcrypt.hashSync(password, 10),
-        isActive: createUserDto.isActive !== undefined ? createUserDto.isActive : true
+        isActive: createUserDto.isActive !== undefined ? createUserDto.isActive : true,
       });
 
       await this.userRepository.save(user);
-      
+
       // Retornar usuario sin contraseña
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _, ...userWithoutPassword } = user;
       return userWithoutPassword as User;
     } catch (error) {
@@ -45,8 +51,8 @@ export class UsersService {
   }
 
   async findAll(
-    paginationDto: PaginationDto, 
-    filters: { role?: ValidRoles; active?: string; search?: string } = {}
+    paginationDto: PaginationDto,
+    filters: { role?: ValidRoles; active?: string; search?: string } = {},
   ): Promise<PaginatedResponse<User>> {
     try {
       const { page = 1, limit = 10 } = paginationDto;
@@ -68,16 +74,13 @@ export class UsersService {
       if (search) {
         queryBuilder.andWhere(
           '(user.name ILIKE :search OR user.surname ILIKE :search OR user.email ILIKE :search)',
-          { search: `%${search}%` }
+          { search: `%${search}%` },
         );
       }
 
       // Paginación
       const skip = (page - 1) * limit;
-      queryBuilder
-        .orderBy('user.createdAt', 'DESC')
-        .skip(skip)
-        .take(limit);
+      queryBuilder.orderBy('user.createdAt', 'DESC').skip(skip).take(limit);
 
       const [users, total] = await queryBuilder.getManyAndCount();
 
@@ -89,7 +92,7 @@ export class UsersService {
 
   async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
-      where: { id }
+      where: { id },
     });
 
     if (!user) {
@@ -102,7 +105,15 @@ export class UsersService {
   async findByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { email },
-      select: { id: true, email: true, password: true, name: true, surname: true, role: true, isActive: true }
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        name: true,
+        surname: true,
+        role: true,
+        isActive: true,
+      },
     });
 
     if (!user) {
@@ -115,21 +126,29 @@ export class UsersService {
   async findByEmailSafe(email: string): Promise<User | null> {
     return await this.userRepository.findOne({
       where: { email },
-      select: { id: true, email: true, password: true, name: true, surname: true, role: true, isActive: true }
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        name: true,
+        surname: true,
+        role: true,
+        isActive: true,
+      },
     });
   }
 
   async findByRole(role: ValidRoles): Promise<User[]> {
     return await this.userRepository.find({
       where: { role, isActive: true },
-      order: { name: 'ASC' }
+      order: { name: 'ASC' },
     });
   }
 
   async findActiveUsers(): Promise<User[]> {
     return await this.userRepository.find({
       where: { isActive: true },
-      order: { name: 'ASC' }
+      order: { name: 'ASC' },
     });
   }
 
@@ -140,7 +159,7 @@ export class UsersService {
       // Si se actualiza el email, verificar que no exista otro usuario con ese email
       if (updateUserDto.email && updateUserDto.email !== user.email) {
         const existingUser = await this.userRepository.findOne({
-          where: { email: updateUserDto.email }
+          where: { email: updateUserDto.email },
         });
 
         if (existingUser) {
@@ -162,25 +181,25 @@ export class UsersService {
   }
 
   async changeUserStatus(id: string, isActive: boolean): Promise<User> {
-    const user = await this.findOne(id);
+    await this.findOne(id);
 
     await this.userRepository.update(id, { isActive });
     return await this.findOne(id);
   }
 
   async changeUserRole(id: string, role: ValidRoles): Promise<User> {
-    const user = await this.findOne(id);
+    await this.findOne(id);
 
     await this.userRepository.update(id, { role });
     return await this.findOne(id);
   }
 
   async resetPassword(id: string, newPassword: string): Promise<User> {
-    const user = await this.findOne(id);
+    await this.findOne(id);
 
     const hashedPassword = bcrypt.hashSync(newPassword, 10);
     await this.userRepository.update(id, { password: hashedPassword });
-    
+
     return await this.findOne(id);
   }
 

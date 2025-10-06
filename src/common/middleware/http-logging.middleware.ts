@@ -11,9 +11,7 @@ export class HttpLoggingMiddleware implements NestMiddleware {
     const startTime = Date.now();
 
     // Log del request entrante
-    this.logger.log(
-      `📥 ${method} ${originalUrl} - ${ip} - ${userAgent}`
-    );
+    this.logger.log(`📥 ${method} ${originalUrl} - ${ip} - ${userAgent}`);
 
     // Capturar cuando la respuesta termina
     response.on('finish', () => {
@@ -30,7 +28,7 @@ export class HttpLoggingMiddleware implements NestMiddleware {
       }
 
       this.logger.log(
-        `📤 ${emoji} ${method} ${originalUrl} ${statusCode} ${contentLength || 0}b - ${responseTime}ms`
+        `📤 ${emoji} ${method} ${originalUrl} ${statusCode} ${contentLength || 0}b - ${responseTime}ms`,
       );
     });
 

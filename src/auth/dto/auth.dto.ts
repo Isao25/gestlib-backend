@@ -16,9 +16,8 @@ export class RegisterUserDto {
 
   @IsString()
   @MinLength(6)
-  @Matches(
-    /(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'La contraseña debe tener al menos una mayúscula, una minúscula y un número'
+  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message: 'La contraseña debe tener al menos una mayúscula, una minúscula y un número',
   })
   password: string;
 

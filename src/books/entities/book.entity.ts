@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum BookStatus {
   AVAILABLE = 'available',
@@ -43,8 +49,7 @@ export class Book {
   @Column({
     type: 'enum',
     enum: BookStatus,
-    default: BookStatus.AVAILABLE
+    default: BookStatus.AVAILABLE,
   })
   status: BookStatus;
-
 }

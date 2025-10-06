@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
@@ -21,13 +31,13 @@ export class BooksController {
   findAll(@Query() findBooksDto: FindBooksDto) {
     const { page, limit, search, available, author, category } = findBooksDto;
     return this.booksService.findAll(
-      { page, limit }, 
-      { 
-        search, 
-        available: available ? 'true' : undefined, 
-        genre: category, 
-        author 
-      }
+      { page, limit },
+      {
+        search,
+        available: available ? 'true' : undefined,
+        genre: category,
+        author,
+      },
     );
   }
 
@@ -52,10 +62,7 @@ export class BooksController {
 
   @Auth(ValidRoles.admin, ValidRoles.librarian)
   @Patch(':id')
-  update(
-    @Param('id', ParseUUIDPipe) id: string, 
-    @Body() updateBookDto: UpdateBookDto
-  ) {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateBookDto: UpdateBookDto) {
     return this.booksService.update(id, updateBookDto);
   }
 

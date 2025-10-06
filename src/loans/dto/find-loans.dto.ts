@@ -1,11 +1,10 @@
 import { IsOptional, IsString, IsEnum } from 'class-validator';
-import { Transform } from 'class-transformer';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export enum LoanStatus {
   ACTIVE = 'active',
   RETURNED = 'returned',
-  OVERDUE = 'overdue'
+  OVERDUE = 'overdue',
 }
 
 export class FindLoansDto extends PaginationDto {

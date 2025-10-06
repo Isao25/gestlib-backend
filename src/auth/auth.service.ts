@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -11,7 +16,6 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
-  
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -21,10 +25,10 @@ export class AuthService {
   async register(registerUserDto: RegisterUserDto) {
     try {
       const { password, ...userData } = registerUserDto;
-      
+
       // Verificar si el usuario ya existe
       const existingUser = await this.userRepository.findOne({
-        where: { email: userData.email }
+        where: { email: userData.email },
       });
 
       if (existingUser) {
@@ -35,17 +39,17 @@ export class AuthService {
       const user = this.userRepository.create({
         ...userData,
         password: bcrypt.hashSync(password, 10),
-        role: ValidRoles.user
+        role: ValidRoles.user,
       });
 
       await this.userRepository.save(user);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _, ...userWithoutPassword } = user;
 
       return {
         user: userWithoutPassword,
-        token: this.getJwtToken({ id: user.id })
+        token: this.getJwtToken({ id: user.id }),
       };
-
     } catch (error) {
       this.handleDBErrors(error);
     }
@@ -56,7 +60,15 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({
       where: { email },
-      select: { email: true, password: true, id: true, name: true, surname: true, role: true, isActive: true }
+      select: {
+        email: true,
+        password: true,
+        id: true,
+        name: true,
+        surname: true,
+        role: true,
+        isActive: true,
+      },
     });
 
     if (!user) {
@@ -71,11 +83,12 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales no válidas');
     }
 
-    const { password: _, ...userWithoutPassword } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: userPassword, ...userWithoutPassword } = user;
 
     return {
       user: userWithoutPassword,
-      token: this.getJwtToken({ id: user.id })
+      token: this.getJwtToken({ id: user.id }),
     };
   }
 

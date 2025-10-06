@@ -10,6 +10,6 @@ import { Book } from '../books/entities/book.entity';
   controllers: [LoansController],
   providers: [LoansService],
   imports: [TypeOrmModule.forFeature([Loan, User, Book])],
-  exports: [TypeOrmModule, LoansService]
+  exports: [TypeOrmModule, LoansService],
 })
 export class LoansModule {}

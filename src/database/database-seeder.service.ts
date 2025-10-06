@@ -17,7 +17,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
     if (this.configService.get('NODE_ENV') === 'development') {
       this.logger.log('🌱 Starting database seeding...');
-      
+
       try {
         await this.seedUsers();
         await this.seedBooks();

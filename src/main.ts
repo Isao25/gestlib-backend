@@ -12,9 +12,7 @@ async function bootstrap() {
 
   // Configurar CORS para permitir frontend
   app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL,
-    ],
+    origin: [process.env.FRONTEND_URL],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
       'Origin',
@@ -33,7 +31,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-    })
+    }),
   );
 
   // Logging global de endpoints
@@ -45,4 +43,4 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
   logger.log(`App running on port ${process.env.PORT ?? 3000}`);
 }
-bootstrap();
+void bootstrap();

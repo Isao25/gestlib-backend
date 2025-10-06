@@ -1,11 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Book } from '../../books/entities/book.entity';
 
 export enum LoanStatus {
   ACTIVE = 'active',
   RETURNED = 'returned',
-  OVERDUE = 'overdue'
+  OVERDUE = 'overdue',
 }
 
 @Entity('loans')
@@ -31,7 +39,7 @@ export class Loan {
   @Column({
     type: 'enum',
     enum: LoanStatus,
-    default: LoanStatus.ACTIVE
+    default: LoanStatus.ACTIVE,
   })
   status: LoanStatus;
 

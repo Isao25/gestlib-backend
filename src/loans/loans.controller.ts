@@ -14,7 +14,7 @@ export class LoansController {
   createLoan(
     @Body('userId', ParseUUIDPipe) userId: string,
     @Body('bookId', ParseUUIDPipe) bookId: string,
-    @Body('daysForLoan') daysForLoan?: number
+    @Body('daysForLoan') daysForLoan?: number,
   ) {
     return this.loansService.createLoan(userId, bookId, daysForLoan);
   }
@@ -23,10 +23,7 @@ export class LoansController {
   @Get()
   findAll(@Query() findLoansDto: FindLoansDto) {
     const { page, limit, status, userId, search } = findLoansDto;
-    return this.loansService.findAll(
-      { page, limit }, 
-      { status, userId, search }
-    );
+    return this.loansService.findAll({ page, limit }, { status, userId, search });
   }
 
   @Auth(ValidRoles.admin, ValidRoles.librarian)
@@ -52,7 +49,7 @@ export class LoansController {
   @Get('user/:userId')
   findByUserId(
     @Param('userId', ParseUUIDPipe) userId: string,
-    @Query() paginationDto: PaginationDto
+    @Query() paginationDto: PaginationDto,
   ) {
     return this.loansService.findByUserId(userId, paginationDto);
   }
@@ -67,7 +64,7 @@ export class LoansController {
   @Patch(':loanId/renew')
   renewLoan(
     @Param('loanId', ParseUUIDPipe) loanId: string,
-    @Body('additionalDays') additionalDays?: number
+    @Body('additionalDays') additionalDays?: number,
   ) {
     return this.loansService.renewLoan(loanId, additionalDays);
   }

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { Loan, LoanStatus } from './entities/loan.entity';
@@ -43,8 +48,8 @@ export class LoansService {
       const overdueLoans = await this.loanRepository.count({
         where: {
           userId,
-          status: LoanStatus.OVERDUE
-        }
+          status: LoanStatus.OVERDUE,
+        },
       });
 
       if (overdueLoans > 0) {
@@ -62,12 +67,12 @@ export class LoansService {
         bookId,
         loanDate,
         dueDate,
-        status: LoanStatus.ACTIVE
+        status: LoanStatus.ACTIVE,
       });
 
       // Reducir copias disponibles del libro
       await this.bookRepository.update(bookId, {
-        availableCopies: book.availableCopies - 1
+        availableCopies: book.availableCopies - 1,
       });
 
       return await this.loanRepository.save(loan);
@@ -78,13 +83,14 @@ export class LoansService {
 
   async findAll(
     paginationDto: PaginationDto,
-    filters: { status?: string; userId?: string; search?: string } = {}
+    filters: { status?: string; userId?: string; search?: string } = {},
   ): Promise<PaginatedResponse<Loan>> {
     try {
       const { page = 1, limit = 10 } = paginationDto;
       const { status, userId, search } = filters;
 
-      const queryBuilder = this.loanRepository.createQueryBuilder('loan')
+      const queryBuilder = this.loanRepository
+        .createQueryBuilder('loan')
         .leftJoinAndSelect('loan.user', 'user')
         .leftJoinAndSelect('loan.book', 'book');
 
@@ -100,16 +106,13 @@ export class LoansService {
       if (search) {
         queryBuilder.andWhere(
           '(user.name ILIKE :search OR user.surname ILIKE :search OR book.title ILIKE :search OR book.author ILIKE :search)',
-          { search: `%${search}%` }
+          { search: `%${search}%` },
         );
       }
 
       // Paginación
       const skip = (page - 1) * limit;
-      queryBuilder
-        .orderBy('loan.createdAt', 'DESC')
-        .skip(skip)
-        .take(limit);
+      queryBuilder.orderBy('loan.createdAt', 'DESC').skip(skip).take(limit);
 
       const [loans, total] = await queryBuilder.getManyAndCount();
 
@@ -119,7 +122,10 @@ export class LoansService {
     }
   }
 
-  async findByUserId(userId: string, paginationDto: PaginationDto): Promise<PaginatedResponse<Loan>> {
+  async findByUserId(
+    userId: string,
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResponse<Loan>> {
     // Verificar que el usuario existe
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
@@ -129,7 +135,8 @@ export class LoansService {
     try {
       const { page = 1, limit = 10 } = paginationDto;
 
-      const queryBuilder = this.loanRepository.createQueryBuilder('loan')
+      const queryBuilder = this.loanRepository
+        .createQueryBuilder('loan')
         .leftJoinAndSelect('loan.user', 'user')
         .leftJoinAndSelect('loan.book', 'book')
         .where('loan.userId = :userId', { userId })
@@ -150,7 +157,8 @@ export class LoansService {
     try {
       const { page = 1, limit = 10 } = paginationDto;
 
-      const queryBuilder = this.loanRepository.createQueryBuilder('loan')
+      const queryBuilder = this.loanRepository
+        .createQueryBuilder('loan')
         .leftJoinAndSelect('loan.user', 'user')
         .leftJoinAndSelect('loan.book', 'book')
         .where('loan.status = :status', { status: LoanStatus.ACTIVE })
@@ -174,7 +182,8 @@ export class LoansService {
 
       const { page = 1, limit = 10 } = paginationDto;
 
-      const queryBuilder = this.loanRepository.createQueryBuilder('loan')
+      const queryBuilder = this.loanRepository
+        .createQueryBuilder('loan')
         .leftJoinAndSelect('loan.user', 'user')
         .leftJoinAndSelect('loan.book', 'book')
         .where('loan.status = :status', { status: LoanStatus.OVERDUE })
@@ -194,7 +203,7 @@ export class LoansService {
   async returnLoan(loanId: string): Promise<Loan> {
     const loan = await this.loanRepository.findOne({
       where: { id: loanId },
-      relations: ['book']
+      relations: ['book'],
     });
 
     if (!loan) {
@@ -212,7 +221,7 @@ export class LoansService {
 
       // Incrementar copias disponibles del libro
       await this.bookRepository.update(loan.bookId, {
-        availableCopies: loan.book.availableCopies + 1
+        availableCopies: loan.book.availableCopies + 1,
       });
 
       return await this.loanRepository.save(loan);
@@ -223,7 +232,7 @@ export class LoansService {
 
   async renewLoan(loanId: string, additionalDays: number = 15): Promise<Loan> {
     const loan = await this.loanRepository.findOne({
-      where: { id: loanId }
+      where: { id: loanId },
     });
 
     if (!loan) {
@@ -252,20 +261,20 @@ export class LoansService {
     try {
       const totalLoans = await this.loanRepository.count();
       const activeLoans = await this.loanRepository.count({
-        where: { status: LoanStatus.ACTIVE }
+        where: { status: LoanStatus.ACTIVE },
       });
       const overdueLoans = await this.loanRepository.count({
-        where: { status: LoanStatus.OVERDUE }
+        where: { status: LoanStatus.OVERDUE },
       });
       const returnedLoans = await this.loanRepository.count({
-        where: { status: LoanStatus.RETURNED }
+        where: { status: LoanStatus.RETURNED },
       });
 
       return {
         totalLoans,
         activeLoans,
         overdueLoans,
-        returnedLoans
+        returnedLoans,
       };
     } catch (error) {
       this.handleDBErrors(error);
@@ -279,9 +288,9 @@ export class LoansService {
     await this.loanRepository.update(
       {
         status: LoanStatus.ACTIVE,
-        dueDate: LessThan(today)
+        dueDate: LessThan(today),
       },
-      { status: LoanStatus.OVERDUE }
+      { status: LoanStatus.OVERDUE },
     );
   }
 

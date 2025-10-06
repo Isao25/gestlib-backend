@@ -1,4 +1,13 @@
-import { IsString, IsOptional, IsDateString, IsInt, Min, IsEnum, MinLength, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsDateString,
+  IsInt,
+  Min,
+  IsEnum,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
 import { BookStatus } from '../entities/book.entity';
 
 export class CreateBookDto {

@@ -1,11 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ValidRoles } from '../../auth/interfaces/valid-roles';
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -30,11 +36,10 @@ export class User {
   @Column({
     type: 'enum',
     enum: ValidRoles,
-    default: ValidRoles.user
+    default: ValidRoles.user,
   })
   role: ValidRoles;
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
-
 }

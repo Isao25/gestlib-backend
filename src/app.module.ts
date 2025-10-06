@@ -26,11 +26,11 @@ import { HttpLoggingMiddleware } from './common/middleware/http-logging.middlewa
         synchronize: true, // Solo para desarrollo
       }),
     }),
-    UsersModule, 
-    BooksModule, 
+    UsersModule,
+    BooksModule,
     AuthModule,
     LoansModule,
-    DatabaseModule
+    DatabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

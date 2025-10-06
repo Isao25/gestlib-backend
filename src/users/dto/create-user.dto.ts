@@ -1,4 +1,13 @@
-import { IsString, IsEmail, IsOptional, IsEnum, IsBoolean, MinLength, MaxLength, Matches } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsOptional,
+  IsEnum,
+  IsBoolean,
+  MinLength,
+  MaxLength,
+  Matches,
+} from 'class-validator';
 import { ValidRoles } from '../../auth/interfaces/valid-roles';
 
 export class CreateUserDto {
@@ -17,9 +26,8 @@ export class CreateUserDto {
 
   @IsString()
   @MinLength(6)
-  @Matches(
-    /(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'La contraseña debe tener al menos una mayúscula, una minúscula y un número'
+  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message: 'La contraseña debe tener al menos una mayúscula, una minúscula y un número',
   })
   password: string;
 
